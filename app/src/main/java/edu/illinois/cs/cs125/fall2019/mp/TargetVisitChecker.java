@@ -41,6 +41,23 @@ public class TargetVisitChecker {
     public static int getTargetWithinRange(final double[] latitudes, final double[] longitudes, final int[] path,
                                            final double currentLatitude, final double currentLongitude,
                                            final int range) {
+        for (int i = 0; i < latitudes.length; i++) {
+            boolean visited = false;
+            for (int j = 0; j < path.length; j++) {
+                if (path[j] == i) {
+                    visited = true;
+                    break;
+                }
+                if (path[j] == -1) {
+                    break;
+                }
+            }
+            if (!visited) {
+                if (LatLngUtils.distance(latitudes[i], longitudes[i], currentLatitude, currentLongitude) <= range) {
+                    return i;
+                }
+            }
+        }
         // HINT: To find the distance in meters between two locations, use a provided helper function:
         // LatLngUtils.distance(oneLatitude, oneLongitude, otherLatitude, otherLongitude)
         return -1;
@@ -73,6 +90,24 @@ public class TargetVisitChecker {
         // HINT: To determine whether two lines cross, use a provided helper function:
         // LineCrossDetector.linesCross(oneStartLat, oneStartLng, oneEndLat, oneEndLng,
         //                              otherStartLat, otherStartLng, otherEndLat, otherEndLng)
+        int lastIndex = -1;
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == -1) {
+                lastIndex = i - 1;
+                break;
+            }
+        }
+        if (lastIndex < 1) {
+            return true;
+        }
+        for (int i = 0; i < lastIndex; i++) {
+            if (LineCrossDetector.linesCross(latitudes[path[i]], longitudes[path[i]],
+                                             latitudes[path[i + 1]], longitudes[path[i + 1]],
+                                             latitudes[path[lastIndex]], longitudes[path[lastIndex]],
+                                             latitudes[tryVisit], longitudes[tryVisit])) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -86,6 +121,12 @@ public class TargetVisitChecker {
      * @return the index in the path array that was updated, or -1 if the path array was full
      */
     public static int visitTarget(final int[] path, final int targetIndex) {
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == -1) {
+                path[i] = targetIndex;
+                return i;
+            }
+        }
         return -1;
     }
 

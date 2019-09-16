@@ -178,6 +178,9 @@ public final class GameActivity extends AppCompatActivity {
 
         // Use the provided placeMarker function to add a marker at every target's location
         // HINT: onCreate initializes the relevant arrays (targetLats, targetLngs, path) for you
+        for (int i = 0; i < targetLats.length; i++) {
+            placeMarker(targetLats[i], targetLngs[i]);
+        }
     }
 
     /**
@@ -199,6 +202,26 @@ public final class GameActivity extends AppCompatActivity {
         // Sequential captures should create green connecting lines on the map
         // HINT: Use the provided changeMarkerColor and addLine functions to manipulate the map
         // HINT: Use the provided color constants near the top of this file as arguments to those functions
+        int targetIndex = TargetVisitChecker.getTargetWithinRange(targetLats, targetLngs, path,
+                                                                  latitude, longitude, PROXIMITY_THRESHOLD);
+        if (targetIndex != -1) {
+            if (TargetVisitChecker.checkSnakeRule(targetLats, targetLngs, path, targetIndex)) {
+                TargetVisitChecker.visitTarget(path, targetIndex);
+                changeMarkerColor(targetLats[targetIndex], targetLngs[targetIndex], CAPTURED_MARKER_HUE);
+                int numPaths = 0;
+                for (int i = 0; i < path.length; i++) {
+                    if (path[i] == -1) {
+                        numPaths = i;
+                        break;
+                    }
+                }
+                if (numPaths > 1) {
+                    addLine(targetLats[path[numPaths - 2]], targetLngs[path[numPaths - 2]],
+                            targetLats[path[numPaths - 1]], targetLngs[path[numPaths - 1]],
+                            PLAYER_COLOR);
+                }
+            }
+        }
     }
 
     /**
